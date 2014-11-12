@@ -37,19 +37,19 @@ Explicit variables:
 -------------------
 1. by what way is a pattern recognized?
 or, how is similarity calculated? percentChange()
-Percent change:
-* Starting at some point in time, measure the changes in price
+  a) Percent change:
+    * Starting at some point in time, measure the changes in price
 relative to that at the initial point.
-* If changes are consistently in the same direction (increasing/decreasing)
+    * If changes are consistently in the same direction (increasing/decreasing)
 a pattern is identified.
-* Consistent changes are considered reinforcing of the pattern.
-* This is a-symmetric, and places greatest weight on starting points,
+    * Consistent changes are considered reinforcing of the pattern.
+    * This is a-symmetric, and places greatest weight on starting points,
 so could be argued to have less predictive power into the future.
-Reverse percent change:
-* Relate the price at the latest price to prices which preceded it.
-Other alternatives:
-* Start-point to end-point
-* Sequential point-to-point
+  b) Reverse percent change:
+    * Relate the price at the latest price to prices which preceded it.
+  c) Other alternatives:
+    * Start-point to end-point
+    * Sequential point-to-point
 2. What is the required similarity to be even considered "a match"?
 lowerBoundSimilarity
 3. What is the searched pattern length? patternMatchLength (e.g. 10, 1000, ...)
