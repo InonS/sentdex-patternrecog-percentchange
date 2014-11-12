@@ -37,17 +37,14 @@ Explicit variables:
 -------------------
 1. by what way is a pattern recognized?
 or, how is similarity calculated? percentChange()
-  a) Percent change:
-    * Starting at some point in time, measure the changes in price
-relative to that at the initial point.
-    * If changes are consistently in the same direction (increasing/decreasing)
-a pattern is identified.
+  a. Percent change:
+    * Starting at some point in time, measure the changes in price relative to that at the initial point.
+    * If changes are consistently in the same direction (increasing/decreasing) a pattern is identified.
     * Consistent changes are considered reinforcing of the pattern.
-    * This is a-symmetric, and places greatest weight on starting points,
-so could be argued to have less predictive power into the future.
-  b) Reverse percent change:
+    * This is a-symmetric, and places greatest weight on starting points, so could be argued to have less predictive power into the future.
+b. Reverse percent change:
     * Relate the price at the latest price to prices which preceded it.
-  c) Other alternatives:
+c. Other alternatives:
     * Start-point to end-point
     * Sequential point-to-point
 2. What is the required similarity to be even considered "a match"?
