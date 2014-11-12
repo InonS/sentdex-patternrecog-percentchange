@@ -3,16 +3,6 @@ Sentdex-PatternRecog_percentChange
 
 Sentdex ML for Algo-trading tutorial
 
-Prerequisite:
--------------
-http://sentdex.com/GBPUSD.zip
-or any other tick data csv file  in format of date time, bid,ask
-
-Goal: 
------
-Pattern matching (Machine Classification) to find Technical Analysis
-graph patterns.
-
 Assumption of Technical Analysis: 
 ---------------------------------
 Graph patterns supposedly reflect trends in
@@ -23,6 +13,16 @@ Hypothesis:
 The re-appearance of a certain series of signals or variables
 (a pattern) is a predictor of the following terms in the series,
 or the outcome.
+
+Goal: 
+-----
+Pattern matching (Machine Classification) to find Technical Analysis
+graph patterns.
+
+Prerequisite:
+-------------
+http://sentdex.com/GBPUSD.zip
+or any other tick data csv file  in format of date time, bid,ask
 
 Objectives:
 -----------
