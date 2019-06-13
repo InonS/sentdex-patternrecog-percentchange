@@ -1,4 +1,4 @@
-'''
+"""
 @file PercentChange.py
 @author: Inon Sharony
 @date Oct 29, 2014
@@ -96,9 +96,9 @@ Improvements:
 2. Write patternRecognition() in C and Cythonize it.
 
 3. Numpy arrays instead of python lists / arrays
-'''
+"""
 import time
-from logging import DEBUG, basicConfig, debug
+from logging import basicConfig, debug
 from sys import stdout
 
 import matplotlib.dates as mdates
@@ -116,10 +116,11 @@ multidimensional array (stripping date to raw number format)'
     date, bid, ask = np.loadtxt(
         ifilename,
         delimiter=',',  # text data file delimiter
-        converters={0: mdates.strpdate2num('%Y%m%d%H%M%S')},  # convert\column 0 using matplotlib.dates "strip date to number" with the given format
+        converters={0: mdates.strpdate2num('%Y%m%d%H%M%S')},
+        # convert\column 0 using matplotlib.dates "strip date to number" with the given format
         skiprows=int(skipfraction * countLinesInFile(ifilename)),
         unpack=True
-        )
+    )
     return date, bid, ask
 
 
@@ -131,12 +132,10 @@ def countLinesInFile(fileName):
 
 
 def percentChange(startPoint, currentPoint):
-
-    if(0 == startPoint):
+    if 0 == startPoint:
         return 0
 
-    retval = 100. * (float(currentPoint) - float(startPoint)) / \
-        abs(float(startPoint))
+    retval = 100. * (float(currentPoint) - float(startPoint)) / abs(float(startPoint))
 
     if 0 == retval:
         return pow(10, -10)
@@ -150,12 +149,12 @@ def average(r):
 
 
 def signbitToStr(b):
-    '''
+    """
     Take numerical expression and return whether it evaluates to
     being Negative or not in a string
     :param b:
-    '''
-    if(np.signbit(b)):
+    """
+    if np.signbit(b):
         return "Negative"
     else:
         return "Non-negative"
@@ -163,7 +162,6 @@ def signbitToStr(b):
 
 def patternStorage(i_line, i_futureSkip, i_outcomeDepth, i_patternMatchLength,
                    o_patternArray, o_patternOutcomesArr):
-
     # processing time
     pattStartTime = time.time()
 
@@ -187,23 +185,23 @@ def patternStorage(i_line, i_futureSkip, i_outcomeDepth, i_patternMatchLength,
     i_patternMatchLength many points prior to this
     for a pattern to be searched)'''
     startLine = i_patternMatchLength + 1
-    while(stopLine > startLine):  # scan over i_line
+    while stopLine > startLine:  # scan over i_line
 
         ''' calculate percent changed between the currentPoint
         and pattern matchLength points before it'''
         for i in range(0, len(percentChangeArray)):
             try:
-                percentChangeArray[i] =\
-                    percentChange(i_line[startLine-i_patternMatchLength],
-                                  i_line[startLine-i_patternMatchLength + i])
+                percentChangeArray[i] = \
+                    percentChange(i_line[startLine - i_patternMatchLength],
+                                  i_line[startLine - i_patternMatchLength + i])
             except Exception, e:
                 print str(e)
                 percentChangeArray.append(0)
 
         # print average of values in (futuristic) outcomeRange
         outcomeRange = \
-            i_line[startLine+i_futureSkip:
-                   startLine+i_futureSkip+i_outcomeDepth]
+            i_line[startLine + i_futureSkip:
+                   startLine + i_futureSkip + i_outcomeDepth]
 
         currentPoint = i_line[startLine]
         '''print "average(outcomeRange) = ", average(outcomeRange)
@@ -260,25 +258,21 @@ def patternStorage(i_line, i_futureSkip, i_outcomeDepth, i_patternMatchLength,
 
 
 def currentPattern(i_line, i_patternMatchLength):
-
-    currentPattern = []
+    _currentPattern = []
     for i in range(0, i_patternMatchLength):
-
         '''print "len(i_line) = ", len(i_line), " beginIndex = ",\
             -1 - i_patternMatchLength, " endIndex = ",\
             i - i_patternMatchLength, " startPoint = ",\
             i_line[-1 - i_patternMatchLength], " endPoint = ",\
             i_line[-1 - i_patternMatchLength + i]'''
 
-        currentPattern.append(percentChange(i_line[-1 - i_patternMatchLength],
-                                            i_line[-1 - i_patternMatchLength
-                                                   + i]))
+        _currentPattern.append(percentChange(i_line[-1 - i_patternMatchLength], i_line[-1 - i_patternMatchLength + i]))
 
-    return currentPattern
+    return _currentPattern
 
 
 def exponentialWeight(i, n):
-    ''' sum over n (from 0 to N - 1) of exp(inx) is (1 - exp(iNx)) / (1 - exp(ix))
+    """ sum over n (from 0 to N - 1) of exp(inx) is (1 - exp(iNx)) / (1 - exp(ix))
 therefore, the sum over n (from 1 to N) of exp(-n) is exp(inx) is
 (1 - exp(iNx)) / (1 - exp(ix)) + exp(iNx) - exp(0) with x = i
 which is (1 - exp(-N)) / (1 - exp(-1)) + exp(-N) - 1
@@ -291,7 +285,7 @@ or (1 - exp(-N)) * ((1 - 1 - exp(-1)) / (1 - exp(-1)))
 e(0) + e(-1) = 1 + e(-1)
 e(0) + e(-1) + e(-2) = 1 + e(-1)*(1 + e(-1)) = (1 + e(-1))^2
 e(0) + e(-1) + e(-2) + e(-3) = 1 + e(-1)*((1 + e(-1))^2)  = (1 + e(-1))^3
-'''
+"""
     return np.exp(1 - i) / pow((1 + np.exp(-1)), n)
 
 
@@ -300,31 +294,30 @@ def showPlotPatternRecognition(i_patternMatchLength, i_patternsMatched,
                                i_indexesOfPatternsToBePloted,
                                i_patternForRecognition,
                                currentMovement, i_outcomesAverage):
+    if 0 == len(i_indexesOfPatternsToBePloted):
+        return
 
-        if(0 == len(i_indexesOfPatternsToBePloted)):
-            return
+    xlabels = []
+    for i in range(1, i_patternMatchLength + 1):
+        xlabels.append(i)
 
-        xlabels = []
-        for i in range(1, i_patternMatchLength + 1):
-            xlabels.append(i)
-
-        fig = Figure(figsize=(10, 6))
-        for i in i_indexesOfPatternsToBePloted:
-            plt.plot(xlabels, i_patternsMatched[i], ':')
-            # @todo histogram of predicted outcomes
-            plt.scatter(i_patternMatchLength * 1.1,
-                        i_patternOutcomes[i],
-                        c=i_pcolor[i], alpha=0.3)
-        plt.scatter(i_patternMatchLength * 1.2,
-                    currentMovement,
-                    c='k', s=25)
-        plt.scatter(i_patternMatchLength * 1.2,
-                    i_outcomesAverage,
-                    c='b', s=35, alpha=0.3)
-        plt.plot(xlabels, i_patternForRecognition, 'k', linewidth=4)
-        plt.grid(True)
-        plt.title("Pattern Recognition")
-        plt.show()
+    fig = Figure(figsize=(10, 6))
+    for i in i_indexesOfPatternsToBePloted:
+        plt.plot(xlabels, i_patternsMatched[i], ':')
+        # @todo histogram of predicted outcomes
+        plt.scatter(i_patternMatchLength * 1.1,
+                    i_patternOutcomes[i],
+                    c=i_pcolor[i], alpha=0.3)
+    plt.scatter(i_patternMatchLength * 1.2,
+                currentMovement,
+                c='k', s=25)
+    plt.scatter(i_patternMatchLength * 1.2,
+                i_outcomesAverage,
+                c='b', s=35, alpha=0.3)
+    plt.plot(xlabels, i_patternForRecognition, 'k', linewidth=4)
+    plt.grid(True)
+    plt.title("Pattern Recognition")
+    plt.show()
 
 
 def patternRecognition(patternArray,
@@ -332,8 +325,7 @@ def patternRecognition(patternArray,
                        predictionArray,
                        patternMatchLength,
                        patternForRecognition,
-                       doGraph):
-
+                       doGraph, lowerBoundSimilarity=80):
     indexesOfPatternsMatched = []
     pcolor = [None] * len(patternArray)
 
@@ -341,30 +333,30 @@ def patternRecognition(patternArray,
     for k in range(0, patternMatchLength):
         similarityArray.append(0)
 
-    lowerBoundSimilarity = 0
     lowerBoundSimilarityElementwise = 0
     maxSim = 0
     for eachPattern in patternArray:
 
         i = 0
         skipThisPattern = False
-        while(patternMatchLength > i):
+        while patternMatchLength > i:
 
             similarityArray[i] = (100. - abs(percentChange(
                 eachPattern[i], patternForRecognition[i])))
             ''' * exponentialWeight(patternMatchLength -
             i, patternMatchLength)'''
 
-            debug("status %f >? %f" % (lowerBoundSimilarityElementwise, similarityArray[i])) # https://github.com/InonS/sentdex-patternrecog-percentchange/issues/1
+            debug("status %f >? %f" % (lowerBoundSimilarityElementwise, similarityArray[
+                i]))  # https://github.com/InonS/sentdex-patternrecog-percentchange/issues/1
 
             # optimization
-            if(lowerBoundSimilarityElementwise > similarityArray[i]):
+            if lowerBoundSimilarityElementwise > similarityArray[i]:
                 skipThisPattern = True
                 break
 
             i += 1
 
-        if(skipThisPattern):
+        if skipThisPattern:
             continue
 
         howSim = average(similarityArray)
@@ -373,14 +365,14 @@ def patternRecognition(patternArray,
         # print patternIndex, " : ", howSim, "% ",
 
         maxSim = max(maxSim, howSim)
-        if(max(maxSim, lowerBoundSimilarity) > howSim):
+        if max(maxSim, lowerBoundSimilarity) > howSim:
             # print
             continue
 
         indexesOfPatternsMatched.append(patternIndex)
 
-        if(patternForRecognition[patternMatchLength - 1] <
-           patternOutcomesArr[patternIndex]):
+        if (patternForRecognition[patternMatchLength - 1] <
+                patternOutcomesArr[patternIndex]):
             pcolor[patternIndex] = 'g'  # '#24bc00'
             predictionArray.append(1.0)
         else:
@@ -398,13 +390,13 @@ def patternRecognition(patternArray,
         print "eachPattern = ", eachPattern
         print '---------------------------'
         print "patternIndex = ", patternIndex
-        print "patternOutcomesArr[patternIndex] = ",\
+        print "patternOutcomesArr[patternIndex] = ", \
             patternOutcomesArr[patternIndex]
 
         if doGraph:
             showPlotPatternRecognition(patternMatchLength, patternArray,
                                        patternOutcomesArr, pcolor,
-                                       patternIndex, patternForRecognition)
+                                       patternIndex, patternForRecognition, None, None)
 
         print '@@@@@@@@@@@@@@@@@@@@@@@@@@@'
         print '@@@@@@@@@@@@@@@@@@@@@@@@@@@'
@@ -419,14 +411,14 @@ def patternRecognition(patternArray,
 
 
 def searchAllSampleLengths(entireAvgLine, patternMatchLength):
-    '''
+    """
     back-tester:
     1. accuracyArray = How accurate are our predictions?
     2. samps = How many tests have we run?
     3. accuracy / num of tests = %accuracy
     :param entireAvgLine:
     :param patternMatchLength:
-    '''
+    """
 
     accuracyArray = []
     samps = 0
@@ -444,7 +436,7 @@ def searchAllSampleLengths(entireAvgLine, patternMatchLength):
 
     dataLength = len(entireAvgLine)
     currentSampleLength = dataLength / 2  # 2 * patternMatchLength
-    while(dataLength > currentSampleLength):
+    while dataLength > currentSampleLength:
 
         avgLine = entireAvgLine[:currentSampleLength]
 
@@ -488,35 +480,34 @@ def searchAllSampleLengths(entireAvgLine, patternMatchLength):
                                    patternForRecognition,
                                    currentMovement, average(outcomesArray))'''
 
-        if (not isPredictionGood):
+        if not isPredictionGood:
             print "predicted drop"
-            print "last point in patternForRecognition = ",\
-                patternForRecognition[len(patternForRecognition) - 1],\
+            print "last point in patternForRecognition = ", \
+                patternForRecognition[len(patternForRecognition) - 1], \
                 ", currentMovement = ", currentMovement
-            if(patternForRecognition[len(patternForRecognition) - 1]
-               > currentMovement):
+            if (patternForRecognition[len(patternForRecognition) - 1]
+                    > currentMovement):
                 accuracyArray.append(100.0)
             else:
                 accuracyArray.append(0.0)
         else:
             print "predicted rise"
-            print "last point in patternForRecognition = ",\
-                patternForRecognition[len(patternForRecognition) - 1],\
+            print "last point in patternForRecognition = ", \
+                patternForRecognition[len(patternForRecognition) - 1], \
                 ", currentMovement = ", currentMovement
-            if(patternForRecognition[len(patternForRecognition) - 1]
-               > currentMovement):
+            if (patternForRecognition[len(patternForRecognition) - 1]
+                    > currentMovement):
                 accuracyArray.append(0.0)
             else:
                 accuracyArray.append(100.0)
 
         samps += 1
-        print "Back-tested accuracy is: ", str(average(accuracyArray)),\
+        print "Back-tested accuracy is: ", str(average(accuracyArray)), \
             "% after ", samps, " samples"
         currentSampleLength += 1
 
 
 def main():
-
     basicConfig(stream=stdout, format=None)  # , level=DEBUG)
 
     totalStart = time.time()
@@ -528,7 +519,7 @@ def main():
     print "lineNum=", countLinesInFile(f)
 
     # load input file to RAM
-    date, bid, ask = loadDatetimeBidAskFromCSVdataFile(f,  0.9)
+    date, bid, ask = loadDatetimeBidAskFromCSVdataFile(f, 0.9)
     dataLength = len(date)
     print 'len(date) = ', dataLength, ' (number of data entries loaded)'
 
@@ -539,7 +530,8 @@ def main():
 
     totalTime = totalEnd - totalStart
 
-    print "# Normal termination. Entire processing time took: ",\
+    print "# Normal termination. Entire processing time took: ", \
         totalTime, " s"
+
 
 main()
