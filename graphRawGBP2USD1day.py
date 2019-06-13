@@ -3,19 +3,24 @@
 @author: Inon Sharony
 @date Oct 28, 2014
 '''
+from os.path import sep
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
+
+from getGBP2USD1day import GBPUSD_TGT_DIR
+
+GBPUSD1d_PATH = sep.join((GBPUSD_TGT_DIR, "GBPUSD1d.txt"))
 
 def graphRawGBP2USD1day():
     
     print 'start of graphRawGBP2USD1day()'
     
     print 'loading csv text data from file into multidimensional array (stripping date to raw number format)'
-    
+
     date, bid, ask = np.loadtxt(
-                                '/home/Slava/workspace/SentdexTutorial/src/AlgoTradingTutorial/GBPUSD1d.txt',    # file name                                
+                                GBPUSD1d_PATH,    # file name
                                 delimiter=',',  # text data file delimiter 
                                 converters={0:mdates.strpdate2num('%Y%m%d%H%M%S')}, # convert column 0 using matplotlib.dates "strip date to number" with the given format
                                 unpack=True
@@ -76,7 +81,9 @@ def graphRawGBP2USD1day():
     
     print 'end of graphRawGBP2USD1day()'
 # end of graphRawGBP2USD1day()
-        
-print 'calling graphRawGBP2USD1day():' 
-graphRawGBP2USD1day()
-print '# program termination'
+
+
+def main():
+    print 'calling graphRawGBP2USD1day():'
+    graphRawGBP2USD1day()
+    print '# program termination'

@@ -97,15 +97,20 @@ Improvements:
 
 3. Numpy arrays instead of python lists / arrays
 '''
-
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-import numpy as np
 import time
+from logging import DEBUG, basicConfig, debug
+from sys import stdout
+
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.figure import Figure
+
+from graphRawGBP2USD1day import GBPUSD1d_PATH
 
 
 def loadDatetimeBidAskFromCSVdataFile(ifilename, skipfraction=0):
+    # type: (str, float) -> tuple
     print 'loading csv text data from file (', ifilename, ') into \
 multidimensional array (stripping date to raw number format)'
     date, bid, ask = np.loadtxt(
@@ -140,6 +145,7 @@ def percentChange(startPoint, currentPoint):
 
 
 def average(r):
+    assert len(r) > 0
     return reduce(lambda x, y: x + y, r) / len(r)  # lambda expression
 
 
@@ -302,7 +308,7 @@ def showPlotPatternRecognition(i_patternMatchLength, i_patternsMatched,
         for i in range(1, i_patternMatchLength + 1):
             xlabels.append(i)
 
-        fig = matplotlib.figure.Figure(figsize=(10, 6))
+        fig = Figure(figsize=(10, 6))
         for i in i_indexesOfPatternsToBePloted:
             plt.plot(xlabels, i_patternsMatched[i], ':')
             # @todo histogram of predicted outcomes
@@ -349,10 +355,14 @@ def patternRecognition(patternArray,
             ''' * exponentialWeight(patternMatchLength -
             i, patternMatchLength)'''
 
+            debug("status %f >? %f" % (lowerBoundSimilarityElementwise, similarityArray[i])) # https://github.com/InonS/sentdex-patternrecog-percentchange/issues/1
+
             # optimization
             if(lowerBoundSimilarityElementwise > similarityArray[i]):
                 skipThisPattern = True
                 break
+
+            i += 1
 
         if(skipThisPattern):
             continue
@@ -402,10 +412,10 @@ def patternRecognition(patternArray,
     print "maxSim = ", maxSim, "%"
 
     print "predictionArray = ", predictionArray
-    avgPrediction = average(predictionArray)
+    avgPrediction = average(predictionArray) if len(predictionArray) > 0 else None
     print "avgPrediction = ", avgPrediction
 
-    return indexesOfPatternsMatched, pcolor, (0 < avgPrediction)
+    return indexesOfPatternsMatched, pcolor, (0 < avgPrediction if avgPrediction else None)
 
 
 def searchAllSampleLengths(entireAvgLine, patternMatchLength):
@@ -507,11 +517,12 @@ def searchAllSampleLengths(entireAvgLine, patternMatchLength):
 
 def main():
 
+    basicConfig(stream=stdout, format=None)  # , level=DEBUG)
+
     totalStart = time.time()
 
     # define input file
-    f = '/home/Slava/workspace/SentdexTutorial/src/\
-AlgoTradingTutorial/GBPUSD1d.txt'    # file name
+    f = GBPUSD1d_PATH  # file name
     print "file=", f
 
     print "lineNum=", countLinesInFile(f)
