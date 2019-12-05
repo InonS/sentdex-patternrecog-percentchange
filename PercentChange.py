@@ -98,13 +98,14 @@ Improvements:
 3. Numpy arrays instead of python lists / arrays
 """
 import time
-from logging import basicConfig, debug
+from logging import INFO, basicConfig, debug
 from sys import stdout
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.figure import Figure
+from tqdm import trange
 
 from graphRawGBP2USD1day import GBPUSD1d_PATH
 
@@ -346,8 +347,7 @@ def patternRecognition(patternArray,
             ''' * exponentialWeight(patternMatchLength -
             i, patternMatchLength)'''
 
-            debug("status %f >? %f" % (lowerBoundSimilarityElementwise, similarityArray[
-                i]))  # https://github.com/InonS/sentdex-patternrecog-percentchange/issues/1
+            debug("status %f >? %f" % (lowerBoundSimilarityElementwise, similarityArray[i]))  # https://github.com/InonS/sentdex-patternrecog-percentchange/issues/1
 
             # optimization
             if lowerBoundSimilarityElementwise > similarityArray[i]:
@@ -379,33 +379,33 @@ def patternRecognition(patternArray,
             pcolor[patternIndex] = 'r'  # '#d40000'
             predictionArray.append(-1.0)
 
-        print " = ", similarityArray
+        # print " = ", similarityArray
+        #
+        # print '###########################'
+        # print '###########################'
+        # print "patternForRecognition = ", patternForRecognition
+        # print '==========================='
+        # print '==========================='
+        # print "howSim = ", howSim, "% "
+        # print "eachPattern = ", eachPattern
+        # print '---------------------------'
+        # print "patternIndex = ", patternIndex
+        # print "patternOutcomesArr[patternIndex] = ", \
+        #     patternOutcomesArr[patternIndex]
+        #
+        # if doGraph:
+        #     showPlotPatternRecognition(patternMatchLength, patternArray,
+        #                                patternOutcomesArr, pcolor,
+        #                                patternIndex, patternForRecognition, None, None)
+        #
+        # print '@@@@@@@@@@@@@@@@@@@@@@@@@@@'
+        # print '@@@@@@@@@@@@@@@@@@@@@@@@@@@'
 
-        print '###########################'
-        print '###########################'
-        print "patternForRecognition = ", patternForRecognition
-        print '==========================='
-        print '==========================='
-        print "howSim = ", howSim, "% "
-        print "eachPattern = ", eachPattern
-        print '---------------------------'
-        print "patternIndex = ", patternIndex
-        print "patternOutcomesArr[patternIndex] = ", \
-            patternOutcomesArr[patternIndex]
+    # print "maxSim = ", maxSim, "%"
 
-        if doGraph:
-            showPlotPatternRecognition(patternMatchLength, patternArray,
-                                       patternOutcomesArr, pcolor,
-                                       patternIndex, patternForRecognition, None, None)
-
-        print '@@@@@@@@@@@@@@@@@@@@@@@@@@@'
-        print '@@@@@@@@@@@@@@@@@@@@@@@@@@@'
-
-    print "maxSim = ", maxSim, "%"
-
-    print "predictionArray = ", predictionArray
+    # print "predictionArray = ", predictionArray
     avgPrediction = average(predictionArray) if len(predictionArray) > 0 else None
-    print "avgPrediction = ", avgPrediction
+    # print "avgPrediction = ", avgPrediction
 
     return indexesOfPatternsMatched, pcolor, (0 < avgPrediction if avgPrediction else None)
 
@@ -435,22 +435,24 @@ def searchAllSampleLengths(entireAvgLine, patternMatchLength):
     predictionArray = []
 
     dataLength = len(entireAvgLine)
-    currentSampleLength = dataLength / 2  # 2 * patternMatchLength
-    while dataLength > currentSampleLength:
+    startingSampleLength = dataLength / 2  # 2 * patternMatchLength
+
+    postfix = dict()
+    sample_iterator = trange(startingSampleLength, dataLength, unit="sample", postfix=postfix)
+    for currentSampleLength in sample_iterator:
 
         avgLine = entireAvgLine[:currentSampleLength]
 
-        currentOutcomeRange = \
-            entireAvgLine[currentSampleLength + futureSkip:
-                          currentSampleLength + futureSkip + outcomeDepth]
-        currentAverageOutcome = average(currentOutcomeRange)
+        currentOutcomeRange = entireAvgLine[
+                              currentSampleLength + futureSkip:currentSampleLength + futureSkip + outcomeDepth]
+        currentAverageOutcome = average(currentOutcomeRange) if len(currentOutcomeRange) > 0 else 0
         currentMovement = percentChange(entireAvgLine[currentSampleLength],
                                         currentAverageOutcome)
         outcomesArray.append(currentMovement)
 
-        print
-        print "***************************************************************"
-        print "***************************************************************"
+        # print
+        # print "***************************************************************"
+        # print "***************************************************************"
 
         # run patternStorage
         duration = patternStorage(avgLine, futureSkip, outcomeDepth,
@@ -458,14 +460,14 @@ def searchAllSampleLengths(entireAvgLine, patternMatchLength):
                                   patternsArray,
                                   patternOutcomesArr)
 
-        print "---------------------------------------------------------------"
-        print "currentSampleLength = ", currentSampleLength, \
-            ", len(patternsArray) = ", len(patternsArray), \
-            ", len(patternOutcomesArr) = ", len(patternOutcomesArr), \
-            " (should be equal). duration = ", duration, " seconds"
-        print "***************************************************************"
-        print "***************************************************************"
-        print
+        # print "---------------------------------------------------------------"
+
+        debug("currentSampleLength = ", currentSampleLength, ", len(patternsArray) = ", len(patternsArray),
+              ",len(patternOutcomesArr) = ", len(patternOutcomesArr), " (should be equal). duration = ", duration,
+              " seconds")
+
+        # print "***************************************************************" print
+        # "***************************************************************" print
 
         patternForRecognition = currentPattern(avgLine, patternMatchLength)
 
@@ -481,10 +483,11 @@ def searchAllSampleLengths(entireAvgLine, patternMatchLength):
                                    currentMovement, average(outcomesArray))'''
 
         if not isPredictionGood:
-            print "predicted drop"
-            print "last point in patternForRecognition = ", \
-                patternForRecognition[len(patternForRecognition) - 1], \
-                ", currentMovement = ", currentMovement
+            # print "predicted drop"
+
+            debug("last point in patternForRecognition = ", patternForRecognition[len(patternForRecognition) - 1],
+                  ", currentMovement = ", currentMovement)
+
             if (patternForRecognition[len(patternForRecognition) - 1]
                     > currentMovement):
                 accuracyArray.append(100.0)
@@ -502,13 +505,14 @@ def searchAllSampleLengths(entireAvgLine, patternMatchLength):
                 accuracyArray.append(100.0)
 
         samps += 1
-        print "Back-tested accuracy is: ", str(average(accuracyArray)), \
-            "% after ", samps, " samples"
+        # print "Back-tested accuracy is: ", str(average(accuracyArray))[:5], "% after ", samps, " samples"
+        postfix['Back-tested accuracy'] = str(average(accuracyArray))[:5] + "%"
+        sample_iterator.set_postfix(postfix)
         currentSampleLength += 1
 
 
 def main():
-    basicConfig(stream=stdout, format=None)  # , level=DEBUG)
+    basicConfig(stream=stdout, level=INFO)
 
     totalStart = time.time()
 
@@ -519,7 +523,7 @@ def main():
     print "lineNum=", countLinesInFile(f)
 
     # load input file to RAM
-    date, bid, ask = loadDatetimeBidAskFromCSVdataFile(f, 0.9)
+    date, bid, ask = loadDatetimeBidAskFromCSVdataFile(f, 0.95)
     dataLength = len(date)
     print 'len(date) = ', dataLength, ' (number of data entries loaded)'
 
